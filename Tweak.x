@@ -1,18 +1,20 @@
 #import "Headers.h"
+#import "SpringBoard-Class.h"
 
 NSString *aog = @"AOG Mode triggered";
-NSString *passphrase = @"test"
+NSString *passphrase = @"test";
 BOOL aogmode;
+id SB;
 
 %hook BBBulletin
 - (void)setSectionID:(NSString*)arg1
 {
         if ([arg1 isEqualToString: @"com.apple.MobileSMS"] || [arg1 isEqualToString: @"com.google.Gmail"]  || [arg1 isEqualToString: @"ph.telegra.Telegraph"])
-               {
+              {
 				   if ([[self message] isEqual: passphrase]) {
-						aogmode = YES;
-						[self setMessage: aog];
-						// Need to call the method down here
+              aogmode = YES;
+              [self setMessage: aog];
+              [SB _updateRingerState:1 withVisuals:true updatePreferenceRegister:true];
 				   }
 			   }
         %orig(arg1);
@@ -25,5 +27,10 @@ BOOL aogmode;
       silentstate = 1;
     }
   %orig(silentstate,displayVisuals,arg3);
+}
+
+- (void)applicationDidFinishLaunching {
+  %orig;
+  SB = self;
 }
 %end
